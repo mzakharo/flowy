@@ -16,11 +16,12 @@ def analyze(img, show=False):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     #img = cv2.Canny(img, 100, 200)
     #img = cv2.threshold(img, 110, 255, cv2.THRESH_TOZERO)[1]
-    img = cv2.bilateralFilter(img,17, 33, 33)
-    #img = cv2.medianBlur(img, 3)
+    img = cv2.bilateralFilter(img, 16, 43, 43)
     #img = cv2.medianBlur(img, 3)
     img = cv2.adaptiveThreshold(img,255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,21, 11)
-    #img = cv2.GaussianBlur(img, (1,3), 0)
+    img = cv2.medianBlur(img, 3)
+    #img = cv2.GaussianBlur(img, (1,1), 0)
+    #img = cv2.GaussianBlur(img, (5,5), 0)
 
     #blur   = cv2.GaussianBlur(img, (5,5), 0)
     #img = cv2.Canny(blur,1,35)
@@ -35,7 +36,8 @@ def analyze(img, show=False):
         cv2.waitKey(0)
 
 
-    bounds = reader.readtext(img , allowlist ='0123456789', decoder='beamsearch', text_threshold=0.75, low_text=0.1)
+    bounds = reader.readtext(img , allowlist ='0123456789', 
+            text_threshold=0.6, low_text=0.1)
     if bounds is not None and len(bounds) == 1:
         bound = bounds[0]
         return bound[1], bound[2]

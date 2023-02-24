@@ -3,6 +3,10 @@ from analyze import analyze
 import numpy as np
 import cv2
 import json
+import sys
+
+dump = len(sys.argv) == 2
+print('dump', dump)
 
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, rc):
@@ -11,6 +15,8 @@ def on_connect(client, userdata, flags, rc):
     # reconnect then subscriptions will be renewed.
     client.subscribe("flowy/raw")
 
+
+prev = 0
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
     image_size = (405, 720)
@@ -20,13 +26,17 @@ def on_message(client, userdata, msg):
     conf = int(conf)
     filename = f'data/{result}.jpg'
     print(result, conf, filename)
-    #cv2.imwrite(filename, img)
+    if dump:
+        cv2.imwrite(filename, img)
     try:
         if len(result) == 9:
             consumption = int(result) / 10
-            data = json.dumps(dict(volume=consumption))
-            print('publish', data)
-            client.publish("flowy/status", data)
+            global prev
+            if 0 <= (consumption-prev) < 50:
+                data = json.dumps(dict(volume=consumption))
+                print('publish', data)
+                client.publish("flowy/status", data)
+            prev = consumption
     except Exception as e:
         print(e)
 
