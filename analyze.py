@@ -1,8 +1,8 @@
-import pytesseract as pyt
+#import pytesseract as pyt
 import cv2
 import numpy as np
 import os
-import imutils
+#import imutils
 import easyocr
 import datetime
 

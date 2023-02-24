@@ -20,7 +20,7 @@ def on_message(client, userdata, msg):
     conf = int(conf)
     filename = f'data/{result}.jpg'
     print(result, conf, filename)
-    cv2.imwrite(filename, img)
+    #cv2.imwrite(filename, img)
     try:
         if len(result) == 9:
             consumption = int(result) / 10
