@@ -12,6 +12,7 @@ class AppLayout(FloatLayout):
 class ButtonsLayout(RelativeLayout):
     normal = StringProperty()
     down = StringProperty()
+    state = False
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -45,8 +46,13 @@ class ButtonsLayout(RelativeLayout):
     def screenshot(self):
         self.parent.edge_detect.capture_screenshot()
 
-    def select_camera(self, facing):
-        self.parent.edge_detect.select_camera(facing)
+    def torch(self, state):
+        if state == 'toggle':
+            self.state = not self.state
+            torch = 'on' if self.state else 'off'
+        else:
+            torch = state
+        self.parent.edge_detect.torch(torch)
 
 Builder.load_string("""
 <AppLayout>:
@@ -62,7 +68,7 @@ Builder.load_string("""
     down:
     Button:
         id:other
-        on_press: root.select_camera('toggle')
+        on_press: root.torch('toggle')
         height: self.width
         width: self.height
         background_normal: 'icons/camera-flip-outline.png'

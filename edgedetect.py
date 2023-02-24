@@ -4,12 +4,15 @@ from kivy.graphics.texture import Texture
 import numpy as np
 import cv2
 from camera4kivy import Preview
+import paho.mqtt.publish as publish
 
 class EdgeDetect(Preview):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.analyzed_texture = None
+        self.capture = False
+
 
     ####################################
     # Analyze a Frame - NOT on UI Thread
@@ -21,18 +24,26 @@ class EdgeDetect(Preview):
         # image_pos    : location of Texture in Preview (due to letterbox)
         # scale  : scale from Analysis resolution to Preview resolution
         # mirror : true if Preview is mirrored
-        
-        rgba   = np.fromstring(pixels, np.uint8).reshape(image_size[1],
-                                                         image_size[0], 4)
-        # Note, analyze_resolution changes the result. Because with a smaller
-        # resolution the gradients are higher and more edges are detected.
-        
-        # ref https://likegeeks.com/python-image-processing/
-        gray   = cv2.cvtColor(rgba, cv2.COLOR_RGBA2GRAY)
-        blur   = cv2.GaussianBlur(gray, (3,3), 0)
-        edges  = cv2.Canny(blur,50,100)
-        rgba   = cv2.cvtColor(edges, cv2.COLOR_GRAY2RGBA) 
-        pixels = rgba.tostring()
+        if self.capture:
+            self.capture = False
+            print('torch off', image_size)
+            self.torch('off')
+
+            publish.single("flowy/raw", pixels, hostname="nas.local")
+
+            rgba   = np.fromstring(pixels, np.uint8).reshape(image_size[1],
+                                                            image_size[0], 4)
+            # Note, analyze_resolution changes the result. Because with a smaller
+            # resolution the gradients are higher and more edges are detected.
+            
+            # ref https://likegeeks.com/python-image-processing/
+            gray   = cv2.cvtColor(rgba, cv2.COLOR_RGBA2GRAY)
+            blur   = cv2.GaussianBlur(gray, (3,3), 0)
+            edges  = cv2.Canny(blur,50,100)
+            rgba   = cv2.cvtColor(edges, cv2.COLOR_GRAY2RGBA) 
+            pixels = rgba.tostring()
+
+'''
 
         self.make_thread_safe(pixels, image_size) 
 
@@ -62,6 +73,7 @@ class EdgeDetect(Preview):
             Color(1,1,1,1)
             Rectangle(texture= self.analyzed_texture,
                       size = tex_size, pos = tex_pos)
+'''
 
 
 

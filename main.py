@@ -12,6 +12,10 @@ if platform == 'android':
     from android import mActivity
     View = autoclass('android.view.View')
 
+    TessBaseAPI = autoclass('com.googlecode.tesseract.android.TessBaseAPI')
+    tessApi = TessBaseAPI()
+    print("TessAPI version:", tessApi.getVersion())
+
     @run_on_ui_thread
     def hide_landscape_status_bar(instance, width, height):
         # width,height gives false layout events, on pinch/spread 
@@ -47,6 +51,21 @@ class MyApp(App):
     def connect_camera(self,dt):
         self.layout.edge_detect.connect_camera(analyze_pixels_resolution = 720,
                                                enable_analyze_pixels = True)
+        Clock.schedule_once(self.torch_start, 3) #allow some time for camera to warm up
+
+    def torch_start(self, dt):
+        print('torch on')
+        self.layout.edge_detect.torch('on')
+        Clock.schedule_once(self.torch_stop, 10)
+
+    def torch_stop(self, dt):
+        self.layout.edge_detect.capture = True
+        Clock.schedule_once(self.torch_start, 30)
+        #Clock.schedule_once(self.disconnect, 2) #allow some time for capture
+        #Clock.schedule_once(self.connect_camera, 30)
+
+    def disconnect(self, dt):
+        self.layout.edge_detect.disconnect_camera()
 
     def on_stop(self):
         self.layout.edge_detect.disconnect_camera()
