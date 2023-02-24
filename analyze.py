@@ -5,6 +5,7 @@ import os
 #import imutils
 import easyocr
 import datetime
+from scipy import ndimage
 
 reader = easyocr.Reader(['en'])
 
@@ -18,12 +19,16 @@ def analyze(img, show=False):
     img = cv2.bilateralFilter(img,17, 33, 33)
     #img = cv2.medianBlur(img, 3)
     #img = cv2.medianBlur(img, 3)
-    img = cv2.adaptiveThreshold(img,255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,21, 21)
+    img = cv2.adaptiveThreshold(img,255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,21, 11)
     #img = cv2.GaussianBlur(img, (1,3), 0)
 
     #blur   = cv2.GaussianBlur(img, (5,5), 0)
     #img = cv2.Canny(blur,1,35)
-    img = img[150:250, 40:400]
+    img = ndimage.rotate(img, -2)
+    img = img[150:250, 40:420]
+
+
+    #rotation angle in degree
 
     if show:
         cv2.imshow('image', img)
@@ -49,7 +54,7 @@ if __name__ == '__main__':
     img_file = "2398969.raw"
     image_size = (405, 720)
     img_file = 'data/002349247.jpg'
-    img_file = 'data/002399250.jpg' #wrong 0 instead of 8
+    img_file = 'data/002399354.jpg'
 
     print('img_file', img_file, image_size)
 
