@@ -4,9 +4,15 @@ import numpy as np
 import cv2
 import json
 import sys
+import argparse
 
-dump = len(sys.argv) == 2
-print('dump', dump)
+parser = argparse.ArgumentParser()
+parser.add_argument('--dump', action='store_true')
+parser.add_argument('--nopublish', action='store_true')
+args = parser.parse_args()
+
+print('dump', args.dump)
+print('no publish', args.nopublish)
 
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, rc):
@@ -21,13 +27,15 @@ prev = 0
 def on_message(client, userdata, msg):
     image_size = (405, 720)
     img = np.frombuffer(msg.payload, np.uint8).reshape(image_size[1], image_size[0], 4)
-    result, conf = analyze(img)
+    result, conf, _ = analyze(img)
     conf *= 100
     conf = int(conf)
     filename = f'data/{result}.jpg'
     print(result, conf, filename)
-    if dump:
+    if args.dump:
         cv2.imwrite(filename, img)
+    if args.nopublish:
+        return
     try:
         if len(result) == 9:
             consumption = int(result) / 10
