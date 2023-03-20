@@ -5,6 +5,7 @@ from kivy.utils import platform
 from kivy.clock import Clock
 from applayout import AppLayout
 from android_permissions import AndroidPermissions
+import paho.mqtt.client as mqtt
 
 if platform == 'android':
     from jnius import autoclass
@@ -49,18 +50,27 @@ class MyApp(App):
         Clock.schedule_once(self.connect_camera)
 
     def connect_camera(self,dt):
+        self.client = mqtt.Client()
+        self.client.connect('nas.local')
+        self.client.loop_start()
+
+        self.layout.edge_detect.callback = self.callback
         self.layout.edge_detect.connect_camera(analyze_pixels_resolution = 720,
                                                enable_analyze_pixels = True)
         Clock.schedule_once(self.torch_start, 3) #allow some time for camera to warm up
 
+    def callback(self, dt):
+        print('torch off', self.layout.edge_detect.image_size)
+        self.layout.edge_detect.torch('off')
+        self.client.publish("flowy/raw", self.layout.edge_detect.pixels)
+
     def torch_start(self, dt):
-        if not self.layout.edge_detect.capture:
-            print('torch on')
-            self.layout.edge_detect.torch('on')
+        print('torch on')
+        self.layout.edge_detect.torch('on')
         Clock.schedule_once(self.torch_stop, 10)
 
     def torch_stop(self, dt):
-        self.layout.edge_detect.capture = True
+        self.layout.edge_detect.capture.set()
         Clock.schedule_once(self.torch_start, 30)
         #Clock.schedule_once(self.disconnect, 2) #allow some time for capture
         #Clock.schedule_once(self.connect_camera, 30)
