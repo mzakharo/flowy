@@ -54,8 +54,9 @@ class MyApp(App):
         Clock.schedule_once(self.torch_start, 3) #allow some time for camera to warm up
 
     def torch_start(self, dt):
-        print('torch on')
-        self.layout.edge_detect.torch('on')
+        if not self.layout.edge_detect.capture:
+            print('torch on')
+            self.layout.edge_detect.torch('on')
         Clock.schedule_once(self.torch_stop, 10)
 
     def torch_stop(self, dt):

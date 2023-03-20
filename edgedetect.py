@@ -4,7 +4,7 @@ from kivy.graphics.texture import Texture
 import numpy as np
 import cv2
 from camera4kivy import Preview
-import paho.mqtt.publish as publish
+import paho.mqtt.client as mqtt
 
 class EdgeDetect(Preview):
 
@@ -12,7 +12,9 @@ class EdgeDetect(Preview):
         super().__init__(**kwargs)
         self.analyzed_texture = None
         self.capture = False
-
+        self.client = mqtt.Client()
+        self.client.connect('nas.local')
+        self.client.loop_start()
 
     ####################################
     # Analyze a Frame - NOT on UI Thread
@@ -27,9 +29,9 @@ class EdgeDetect(Preview):
         if self.capture:
             self.capture = False
             print('torch off', image_size)
+            self.torch('off')
             try:
-                self.torch('off')
-                publish.single("flowy/raw", pixels, hostname="nas.local")
+                self.client.publish("flowy/raw", pixels)
             except Exception as e:
                 print(e)
 
