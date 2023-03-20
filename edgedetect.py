@@ -1,8 +1,8 @@
 from kivy.clock import mainthread
 from kivy.graphics import Color, Rectangle
 from kivy.graphics.texture import Texture
-import numpy as np
-import cv2
+#import numpy as np
+#import cv2
 from camera4kivy import Preview
 import paho.mqtt.client as mqtt
 
